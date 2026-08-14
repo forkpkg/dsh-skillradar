@@ -92,7 +92,7 @@ node --input-type=module -e "import { apply } from './index.js'; apply({get:()=>
 
 The client/ directory contains the optional interactive radar panel (dynamic Cordis plugin form) for the web UI.
 
-Contributions: open issues/PRs on GitHub. Keep changes dependency-free.
+Contributions: open issues and pull requests on GitHub. Keep changes dependency-free (scoring is self-contained). Report bugs with a minimal reproduction case.
 
 ## License & security
 
