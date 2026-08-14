@@ -1,0 +1,17 @@
+{
+  "name": "dsh-skillradar",
+  "version": "0.1.0",
+  "description": "Skill Radar for DeepSeek Harness (dsh): scan the current session's visible skills, score their relevance against the recent conversation, and recommend which skill to load. Model tool + optional interactive panel.",
+  "type": "module",
+  "main": "index.js",
+  "files": ["index.js", "cordis.patch.yml"],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+  }
+}
