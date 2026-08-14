@@ -2,6 +2,8 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 
 export const name = 'skillradar'
 
+export const inject = ['tools']
+
 // ============================================================
 // SkillRadar — 技能雷达
 // 扫描当前会话可见的全部 skills,读取最近对话文本,
