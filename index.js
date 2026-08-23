@@ -5,30 +5,16 @@ export const name = 'skillradar'
 export const inject = ['tools']
 
 // ============================================================
-// SkillRadar — 技能雷达
-// 扫描当前会话可见的全部 skills,读取最近对话文本,
-// 用中英文分词做相关性打分,返回按分数排序的推荐列表 + 命中关键词。
-// 模型可调用 skill_radar 工具获取"当前最该加载哪个技能"。
+// SkillRadar - DeepSeek Harness plugin that scans every skill visible to the current session, scores each against the recent conversation text (English + Chinese token overlap), and returns a ranked recommendation of which skill to load next.
+// The model can call the skill_radar tool to get "which skill should be loaded next".
 // ============================================================
 
-// ---- 停用词(中英混合,过滤高频无信息量词) ----
-const STOP = new Set([
-  'the', 'and', 'for', 'with', 'from', 'this', 'that', 'you', 'your',
-  'are', 'was', 'were', 'have', 'has', 'had', 'not', 'but', 'can', 'will',
-  'just', 'what', 'when', 'how', 'why', 'who', 'which', 'into', 'about',
-  'them', 'they', 'their', 'there', 'here', 'than', 'then', 'also', 'very',
-  'more', 'most', 'some', 'any', 'all', 'one', 'two', 'use', 'using', 'used',
-  'via', 'its', 'our', 'out', 'per', 'new', 'now', 'get', 'set', 'may',
-  'must', 'should', 'would', 'could', 'does', 'do', 'be', 'to', 'of', 'in',
-  'on', 'at', 'by', 'as', 'it', 'is', 'an', 'or', 'if',
-  '请', '把', '帮', '给', '这', '那', '个', '一', '和', '的', '了', '在',
-  '我', '你', '他', '它', '是', '不', '有', '就', '都', '也', '还', '要',
-  '会', '能', '想', '让', '用', '做', '写', '说', '看', '去',
-  '直接', '这个', '那个', '什么', '怎么', '可以', '需要', '没有', '一个',
-  '一句', '完整', '生成', '做成', '自动', '我们', '你们', '他们',
-])
+// ---- stop words (Chinese-English mix, filtering high-frequency meaningless words) ----
+const STOP = new Set(['the', 'and', 'for', 'with', 'from', 'this', 'that', 'you', 'your', 'are', 'was', 'were', 'have', 'has', 'had', 'not', 'but', 'can', 'will', 'just', 'what', 'when', 'how', 'why', 'who', 'which', 'into', 'about', 'them', 'they', 'their', 'there', 'here', 'than', 'then', 'also', 'very', 'more', 'most', 'some', 'any', 'all', 'one', 'two', 'use', 'using', 'used', 'via', 'its', 'our', 'out', 'per', 'new', 'now', 'get', 'set', 'may', 'must', 'should', 'would', 'could', 'does', 'do', 'be', 'to', 'of', 'in', 'on', 'at', 'by', 'as', 'it', 'is', 'an', 'or', 'if']);
 
-/** 中英文混合分词:英文单词 + 中文双字滑动窗口 */
+/**
+ * Tokenizes text by finding English words and handling Chinese characters using a two-character sliding window.
+ */
 function tokenize(text) {
   const out = {}
   const lower = String(text || '').toLowerCase()
@@ -47,7 +33,9 @@ function tokenize(text) {
   return out
 }
 
-/** 从会话表面事件提取最近文本(SessionEvent 载荷在 data.message) */
+/**
+ * Extracts the most recent text from the session's surface events (payload located at data.message).
+ */
 function textFromSurface(events) {
   const parts = []
   if (!Array.isArray(events)) return ''
@@ -64,8 +52,8 @@ function textFromSurface(events) {
 }
 
 /**
- * 解析会话所属 preset 的 standing scope key,
- * 让 skills.list({ scope }) 能看到当前会话(preset 层)的技能。
+ * Resolves the standing scope key for the current session's preset.
+ * This ensures that skills listing considers the context of the current runtime.
  */
 async function scopeFor(ctx, sessionId) {
   const presets = ctx.get('agentPresets')
@@ -85,7 +73,7 @@ async function scopeFor(ctx, sessionId) {
   }
 }
 
-/** 核心扫描 + 打分 */
+/** Core scanning + scoring */
 async function scanSkills(ctx, sessionId) {
   const skills = ctx.get('skills')
   if (!skills) throw new Error('skills service unavailable')
@@ -95,7 +83,7 @@ async function scanSkills(ctx, sessionId) {
   const list = scope ? await skills.list({ scope }) : await skills.list()
   summaries = list || []
 
-  // 会话文本:优先 readSurface;失败则回退空文本
+  // Conversation text: prioritize readSurface; fallback to empty text on failure
   let conversationText = ''
   const q = ctx.get('sessionQuery')
   if (q && sessionId) {
@@ -204,7 +192,7 @@ export function apply(ctx) {
       render: function (args, value) {
         if (!value.ok) return [{ type: 'text', text: 'skill_radar error: ' + value.error }]
         if (value.total === 0) return [{ type: 'text', text: 'No skills are visible in this session.' }]
-        const lines = [`Skill Radar — ${value.total} skills visible` + (value.hasConversation ? '' : ' (no conversation text yet)')]
+        const lines = [`Skill Radar - ${value.total} skills visible` + (value.hasConversation ? '' : ' (no conversation text yet)')]
         for (const sk of value.skills.slice(0, args.limit || 15)) {
           const hitText = sk.hits && sk.hits.length > 0 ? ' [' + sk.hits.map((h) => h.token).join(', ') + ']' : ''
           lines.push(`  ${sk.score}%  ${sk.name}${hitText}`)

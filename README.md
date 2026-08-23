@@ -56,8 +56,8 @@ skill_radar  # with no arguments, scans the current session
 Example output:
 
 ```
-Skill Radar — 16 skills visible
-  100%  github-upload [github, 仓库, readme, 上传]
+Skill Radar - 16 skills visible
+  100%  github-upload [github, Repo, README, Upload]
    85%  cordis-plugin-development [client, host, cordis, run]
 ```
 
@@ -99,4 +99,4 @@ Contributions: open issues and pull requests on GitHub. Keep changes dependency-
 
 ## License & security
 
-MIT — see [LICENSE](LICENSE). No secrets are shipped; report security issues privately via GitHub issue (repo is public) or email to the repository owner.
+MIT - see [LICENSE](LICENSE). No secrets are shipped; report security issues privately via GitHub issue (repo is public) or email to the repository owner.
